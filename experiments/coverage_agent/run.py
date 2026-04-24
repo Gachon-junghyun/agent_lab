@@ -1,6 +1,6 @@
 """
 사용법 (AGENT/ 루트에서 실행):
-    python -m experiments.coverage_agent.run --goal "삼성전자 2024 실적 요약" --model gemini
+    python -m experiments.coverage_agent.run --goal "LLM 파인튜닝 개념 및 방법 요약" --model gemini 
     python -m experiments.coverage_agent.run --goal "..." --model deepseek --deepseek-model deepseek-reasoner
     python -m experiments.coverage_agent.run --goal "..." --model ollama --ollama-model qwen2.5:7b
     python -m experiments.coverage_agent.run --goal "..." --model gemini --verify
@@ -20,6 +20,7 @@ if _AGENT_ROOT not in sys.path:
 
 from core.ai import get_llm
 from core.agent.ingest import load_documents
+from core.ui import show_flow
 from experiments.coverage_agent.state import CoverageState
 from experiments.coverage_agent.harness import run_harness, save_run_log
 
@@ -74,6 +75,7 @@ def main():
         print(state.draft_summary)
 
     save_run_log(state, log_dir=args.log_dir)
+    show_flow(state)
 
 
 if __name__ == "__main__":
