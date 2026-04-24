@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 환경변수 / API 키
+.env
+.env.*
+*.env
+
+# 런타임 생성 로그
+logs/
+experiments/coverage_agent/logs/
+
+# 입력 문서 (개인 자료 / 민감 데이터)
+experiments/coverage_agent/data/*
+!experiments/coverage_agent/data/.gitkeep
+!experiments/coverage_agent/data/README.txt
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 가상환경
+.venv/
+venv/
+env/
