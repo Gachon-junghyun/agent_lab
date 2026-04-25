@@ -1,5 +1,5 @@
 # FILE: core/tool/base_tool.py
-# @core-candidate: BaseTool, 2026-04, 모든 툴의 추상 기반 클래스
+# @core-candidate: BaseTool / AgentTool, 2026-04, 모든 툴의 추상 기반 클래스
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -10,7 +10,6 @@ class BaseTool(ABC):
 
     @abstractmethod
     def run(self, *args, **kwargs) -> Any:
-        """툴 실행. 서브클래스에서 시그니처 정의."""
         ...
 
     def spec(self) -> dict:
@@ -18,9 +17,23 @@ class BaseTool(ABC):
 
 
 class AgentTool(BaseTool, ABC):
-    """CoverageState + LLM을 받아 state를 반환하는 에이전트 노드 툴."""
+    """
+    CoverageState + LLM을 받아 state를 반환하는 에이전트 노드 툴.
+
+    run()이 호출되면:
+      1. state.active_guideline = guideline  (call_llm이 system에 자동 주입)
+      2. _run(state, llm) 실행
+      3. state.active_guideline 초기화
+    """
+
+    def run(self, state: Any, llm: Any, guideline: str = "") -> Any:
+        state.active_guideline = guideline
+        try:
+            return self._run(state, llm)
+        finally:
+            state.active_guideline = ""
 
     @abstractmethod
-    def run(self, state: Any, llm: Any, guideline: str = "") -> Any:
-        """state를 받아 수정된 state를 반환."""
+    def _run(self, state: Any, llm: Any) -> Any:
+        """서브클래스에서 노드 함수를 호출."""
         ...

@@ -1,5 +1,4 @@
 # FILE: experiments/coverage_agent/prompts.py
-# 모든 시스템 프롬프트를 여기서만 관리 — 노드 동작을 바꾸려면 이 파일만 수정
 
 PLANNER_SYSTEM = """당신은 문서 요약·조사 작업을 분해하는 Supervisor다.
 
@@ -77,9 +76,7 @@ JUDGE_SYSTEM = """당신은 요약 완성도를 검증하는 Coverage Judge다.
 {
   "verdict": "pass|fail",
   "coverage_score": 0.0,
-  "missing_items": [
-    {"item_id": "c3", "reason": "...", "fix_instruction": "..."}
-  ],
+  "missing_items": [{"item_id": "c3", "reason": "...", "fix_instruction": "..."}],
   "unsupported_claims": [{"claim": "...", "reason": "..."}],
   "revision_plan": ["..."]
 }"""

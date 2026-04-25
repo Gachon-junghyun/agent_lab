@@ -11,5 +11,5 @@ class JudgeTool(AgentTool):
         "누락 항목, revision_plan을 반환한다. summarizer 실행 후 반드시 호출한다."
     )
 
-    def run(self, state: Any, llm: Any, guideline: str = "") -> Any:
+    def _run(self, state: Any, llm: Any) -> Any:
         return run_judge(state, llm)

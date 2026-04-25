@@ -54,6 +54,7 @@ class OrchestratorHarness:
         """
         history: List[str] = []
         all_tools = self._registry.all_tools()
+        next_query = "작업 계획 수립"  # 첫 스텝 초기 쿼리
 
         print(f"\n{'='*54}")
         print(f"[Orchestrator] 목표: {state.user_goal}")
@@ -61,9 +62,9 @@ class OrchestratorHarness:
         print(f"{'='*54}\n")
 
         for step in range(1, self._max_steps + 1):
-            # 현재 상태에 맞는 툴 후보 검색
-            query = self._build_search_query(state, history)
-            candidates = self._registry.search(query, top_k=self._top_k)
+            # MainLLM이 이전 스텝에서 제안한 쿼리로 후보 검색
+            candidates = self._registry.search(next_query, top_k=self._top_k)
+            print(f"  [Step {step}] 검색 쿼리: '{next_query}' → 후보: {[t.name for t in candidates]}")
 
             # Main LLM: 다음 액션 결정
             decision = self._main.decide(state, candidates, self._store, history)
@@ -82,27 +83,13 @@ class OrchestratorHarness:
             state = self._run_with_retry(tool, state, decision.action)
             history.append(f"[Step {step}] {decision.action} 실행 완료")
 
+            # 다음 스텝 검색 쿼리 갱신 (없으면 빈 쿼리 → 전체 툴 대상)
+            next_query = decision.next_query or ""
+
         print(f"\n[Orchestrator] max_steps({self._max_steps}) 도달\n")
         return state
 
     # ── 내부 ─────────────────────────────────────────────────────────────
-
-    def _build_search_query(self, state: Any, history: List[str]) -> str:
-        """현재 state에서 '다음에 필요한 작업'을 설명하는 쿼리 생성."""
-        if not getattr(state, "task_plan", None):
-            return "작업 계획 수립 목표 분석"
-        if not getattr(state, "checklist", None):
-            return "문서 내용 추출 체크리스트"
-        if not getattr(state, "draft_summary", None):
-            return "요약 생성 초안 작성"
-        if not getattr(state, "judge_result", None):
-            return "요약 품질 평가 검증"
-        verdict = (state.judge_result or {}).get("verdict", "fail")
-        if verdict == "fail" and getattr(state, "retry_count", 0) < getattr(state, "max_retries", 2):
-            return "요약 재작성 수정 보완"
-        if not getattr(state, "audit_result", None):
-            return "최종 감사 릴리스 결정"
-        return "완료"
 
     def _run_with_retry(self, tool: Any, state: Any, tool_name: str) -> Any:
         for attempt in range(self._max_retries + 1):

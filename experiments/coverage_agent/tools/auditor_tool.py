@@ -11,5 +11,5 @@ class AuditorTool(AgentTool):
         "모든 작업의 마지막 단계에서 실행한다."
     )
 
-    def run(self, state: Any, llm: Any, guideline: str = "") -> Any:
+    def _run(self, state: Any, llm: Any) -> Any:
         return run_auditor(state, llm)

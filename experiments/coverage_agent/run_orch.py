@@ -1,16 +1,20 @@
-# FILE: experiments/orchestrator_agent/run.py
-# COPIED FROM : experiments/coverage_agent/run_v2.py 구조 참조
-# 이 파일은 run_v2.py와 동일한 ToolRegistry 기반 하네스를 사용한다.
 """
+OrchestratorHarness 기반 실행 (ReAct + 시맨틱 툴 탐색)
+
 사용법:
-    python -m experiments.orchestrator_agent.run --goal "llm 파인튜닝 개념 정리" --model gemini
+    python -m experiments.coverage_agent.run_orch --goal "llm 파인튜닝 개념 정리"
+    python -m experiments.coverage_agent.run_orch --goal "..." --model deepseek
+
+고정 파이프라인(run.py)과의 차이:
+    run.py      → planner→extractor→summarizer→judge→...  순서 고정
+    run_orch.py → OrchestratorHarness가 매 스텝마다 어떤 툴을 쓸지 스스로 결정
 """
 import argparse
 import os
 import sys
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_COVERAGE_DIR = os.path.join(_ROOT, "experiments", "coverage_agent")
+_DIR = os.path.dirname(os.path.abspath(__file__))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
@@ -28,11 +32,11 @@ from experiments.coverage_agent.harness import save_run_log
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Coverage Agent — OrchestratorHarness 모드")
     parser.add_argument("--goal", required=True)
     parser.add_argument("--model", default="gemini", choices=["gemini", "ollama", "deepseek"])
-    parser.add_argument("--data-dir", default=os.path.join(_COVERAGE_DIR, "data"))
-    parser.add_argument("--log-dir", default=os.path.join(_COVERAGE_DIR, "logs"))
+    parser.add_argument("--data-dir", default=os.path.join(_DIR, "data"))
+    parser.add_argument("--log-dir", default=os.path.join(_DIR, "logs"))
     parser.add_argument("--max-retries", type=int, default=2)
     parser.add_argument("--no-gui", action="store_true")
     parser.add_argument("--gemini-model", default="gemini-2.5-flash")
@@ -42,14 +46,11 @@ def main():
 
     llm = get_llm(args.model, model_name=getattr(args, f"{args.model}_model"))
     docs = load_documents(args.data_dir)
+    print(f"[run_orch] 모델: {args.model} | 문서: {len(docs)}개")
 
     registry = ToolRegistry()
     registry.register_all([
-        PlannerTool(),
-        ExtractorTool(),
-        SummarizerTool(),
-        JudgeTool(),
-        AuditorTool(),
+        PlannerTool(), ExtractorTool(), SummarizerTool(), JudgeTool(), AuditorTool(),
     ])
 
     harness = OrchestratorHarness(
@@ -75,7 +76,6 @@ def main():
     print(state.final_output or state.draft_summary or "(출력 없음)")
 
     save_run_log(state, log_dir=args.log_dir)
-
     if not args.no_gui:
         show_flow(state)
 

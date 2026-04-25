@@ -7,9 +7,9 @@ from experiments.coverage_agent.nodes.planner import run_planner
 class PlannerTool(AgentTool):
     name = "planner"
     description = (
-        "사용자 목표와 문서 목록을 분석해 작업 유형(task_type)과 subtask 목록을 담은 "
+        "사용자 목표와 문서 목록을 분석해 task_type과 subtask 목록을 담은 "
         "task_plan을 수립한다. 가장 먼저 실행해야 한다."
     )
 
-    def run(self, state: Any, llm: Any, guideline: str = "") -> Any:
+    def _run(self, state: Any, llm: Any) -> Any:
         return run_planner(state, llm)

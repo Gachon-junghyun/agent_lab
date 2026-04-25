@@ -20,9 +20,9 @@ if _AGENT_ROOT not in sys.path:
 
 from core.ai import get_llm
 from core.agent.ingest import load_documents
+from core.agent.coverage_state import CoverageState
+from core.orchestrator.coverage_harness import run_harness, save_run_log
 from core.ui import show_flow
-from experiments.coverage_agent.state import CoverageState
-from experiments.coverage_agent.harness import run_harness, save_run_log
 
 
 def build_llm(args):

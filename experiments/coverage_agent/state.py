@@ -19,7 +19,6 @@ class CoverageState(BaseState):
     audit_result: Optional[Dict] = None
 
     def docs_as_text(self) -> str:
-        """노드에 넘길 문서 텍스트 블록"""
         return "\n\n---\n\n".join(
             f"[{d.id}] {d.filename}\n{d.content}" for d in self.documents
         )

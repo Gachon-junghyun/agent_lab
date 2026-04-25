@@ -13,6 +13,7 @@ class BaseState:
     max_retries: int = 2
     logs: List[str] = field(default_factory=list)
     node_traces: List[dict] = field(default_factory=list)
+    active_guideline: str = ""    # 현재 실행 중인 툴의 가이드라인 (AgentTool이 주입)
 
     def log(self, msg: str):
         self.logs.append(msg)
